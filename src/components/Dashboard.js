@@ -1,22 +1,40 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Box, Grid, Paper, Typography, CircularProgress } from '@mui/material';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJs, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  CircularProgress,
+} from '@mui/material';
+import { Line, Doughnut } from 'react-chartjs-2';
+import { DataGrid } from '@mui/x-data-grid';
+import {
+  Chart as ChartJs,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
 import { fetchStoreData } from '../store/slices/shopeeSlice';
 
-const Dashboard = () => {
-  // Register Chart.js components
-  ChartJs.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-  );
+// ✅ Register chart components once
+ChartJs.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
+const Dashboard = () => {
   const dispatch = useDispatch();
   const { selectedStore, loading, error, summary, salesTrend } =
     useSelector((state) => state.shopee);
@@ -26,6 +44,8 @@ const Dashboard = () => {
       dispatch(fetchStoreData(selectedStore));
     }
   }, [dispatch, selectedStore]);
+
+  const chartRef = useRef(null);
 
   const salesTrendOptions = {
     responsive: true,
@@ -41,18 +61,37 @@ const Dashboard = () => {
     },
   };
 
-  const chartRef = useRef(null);
-
   const salesTrendData = {
     labels: salesTrend?.labels || ['No Data'],
-    datasets: salesTrend?.datasets || [{
-      label: 'Sales',
-      data: [0],
-      borderColor: '#ff424e',
-      tension: 0.1,
-      fill: false
-    }]
+    datasets: salesTrend?.datasets || [
+      {
+        label: 'Sales',
+        data: [0],
+        borderColor: '#ff424e',
+        tension: 0.1,
+        fill: false,
+      },
+    ],
   };
+
+  const categoryData = {
+    labels: summary?.categoryDistribution?.map((c) => c.name) || [],
+    datasets: [
+      {
+        data: summary?.categoryDistribution?.map((c) => c.count) || [],
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8BC34A', '#FF9800'],
+      },
+    ],
+  };
+
+  const productColumns = [
+    { field: 'id', headerName: 'ID', width: 90 },
+    { field: 'name', headerName: 'Name', width: 200 },
+    { field: 'price', headerName: 'Price', width: 120 },
+    { field: 'stock', headerName: 'Stock', width: 120 },
+  ];
+
+  const productRows = summary?.products || [];
 
   if (loading) {
     return (
@@ -79,7 +118,7 @@ const Dashboard = () => {
             <Typography variant="h6" gutterBottom>
               Total Products
             </Typography>
-            <Typography variant="h4">{summary.totalProducts}</Typography>
+            <Typography variant="h4">{summary?.totalProducts ?? '-'}</Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={3}>
@@ -87,7 +126,7 @@ const Dashboard = () => {
             <Typography variant="h6" gutterBottom>
               Total Sales
             </Typography>
-            <Typography variant="h4">{summary.totalSales} THB</Typography>
+            <Typography variant="h4">{summary?.totalSales ?? '-'} THB</Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={3}>
@@ -95,7 +134,9 @@ const Dashboard = () => {
             <Typography variant="h6" gutterBottom>
               Best Seller
             </Typography>
-            <Typography variant="h4">{summary.bestSeller?.name || 'N/A'}</Typography>
+            <Typography variant="h4">
+              {summary?.bestSeller?.name ?? 'N/A'}
+            </Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={3}>
@@ -103,7 +144,7 @@ const Dashboard = () => {
             <Typography variant="h6" gutterBottom>
               Out of Stock
             </Typography>
-            <Typography variant="h4">{summary.outOfStock}</Typography>
+            <Typography variant="h4">{summary?.outOfStock ?? '-'}</Typography>
           </Paper>
         </Grid>
 
@@ -113,21 +154,17 @@ const Dashboard = () => {
             <Typography variant="h6" gutterBottom>
               Sales Trend
             </Typography>
-            <Line
-              ref={chartRef}
-              data={salesTrendData}
-              options={salesTrendOptions}
-            />
+            <Line ref={chartRef} data={salesTrendData} options={salesTrendOptions} />
           </Paper>
         </Grid>
 
-        {/* Category Distribution */}
+        {/* Category Distribution Chart */}
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Category Distribution
             </Typography>
-            {/* TODO: Add category distribution chart */}
+            <Doughnut data={categoryData} />
           </Paper>
         </Grid>
 
@@ -137,7 +174,14 @@ const Dashboard = () => {
             <Typography variant="h6" gutterBottom>
               Products
             </Typography>
-            {/* TODO: Add product table */}
+            <div style={{ height: 400, width: '100%' }}>
+              <DataGrid
+                rows={productRows}
+                columns={productColumns}
+                pageSize={5}
+                rowsPerPageOptions={[5]}
+              />
+            </div>
           </Paper>
         </Grid>
       </Grid>
