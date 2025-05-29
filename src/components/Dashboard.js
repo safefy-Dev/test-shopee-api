@@ -2,12 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Box, Grid, Paper, Typography, CircularProgress } from '@mui/material';
 import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJs, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { fetchStoreData } from '../store/slices/shopeeSlice';
 
 const Dashboard = () => {
   // Register Chart.js components
-  ChartJS.register(
+  ChartJs.register(
     CategoryScale,
     LinearScale,
     PointElement,
