@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Box, Grid, Paper, Typography, CircularProgress } from '@mui/material';
 import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS } from 'chart.js/auto';
 import { fetchStoreData } from '../store/slices/shopeeSlice';
 
 const Dashboard = () => {
