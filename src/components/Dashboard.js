@@ -10,7 +10,7 @@ import {
 import { Line, Doughnut } from 'react-chartjs-2';
 import { DataGrid } from '@mui/x-data-grid';
 import {
-  Chart as ChartJs,
+  Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
@@ -23,7 +23,7 @@ import {
 import { fetchStoreData } from '../store/slices/shopeeSlice';
 
 // ✅ Register chart components once
-ChartJs.register(
+ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
